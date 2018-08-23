@@ -19,9 +19,45 @@
         letter-spacing: 5px;
     }
 </style>
-
+<script>
+    function add(){
+        var divInsertForm = document.querySelector('#divInsertForm');
+        divInsertForm.style.display = '';
+    }
+    function edit(obj){
+        obj.innerHTML = "test";
+    }
+    function remove(obj){
+        obj.parentNode.removeChild(this);
+        //send to server the information
+    }
+    function done(){
+        var divInsertForm = document.querySelector('#divInsertForm');
+        var title = divInsertForm.querySelector('#ipTitle');
+        var gotDate = divInsertForm.querySelector('#ipGotDate');
+        var expDate = divInsertForm.querySelector('#ipExpDate');
+        var desc = divInsertForm.querySelector('#ipDesc');
+        
+        var tmp = document.querySelector("#tmpSelect");
+        tmp.content.querySelector('#spanTitle').textContent = title.value;
+        tmp.content.querySelector('#spanGotDate').textContent = gotDate.value;
+        tmp.content.querySelector('#spanExpDate').textContent = expDate.value;
+        tmp.content.querySelector('#spanDesc').textContent = desc.value;
+        
+        var clone = document.importNode(tmp.content, true);
+        divInsertForm.parentNode.insertBefore(clone,divInsertForm.nextSibling);
+        
+        divInsertForm.style.display = 'none';
+        title.value = "";
+        gotDate.value = "";
+        expDate.value = "";
+        desc.value = "";
+        
+        //send to server the information
+    }
+</script>
 <body>
-    <div class="w3-white w3-margin">
+    <div id="divTopArea" class="w3-white w3-margin">
         <input type="text"/>
         <button id="btnAdd" onclick="add()">Add</button>
         <button>Name</button>
@@ -29,35 +65,36 @@
         <button>Expired Date</button>
     </div>
     
-
-    <div class="w3-white w3-margin">
+    <div id="divInsertForm" style="display: none" class="w3-white w3-margin">
         <div class="w3-container w3-padding w3-black">
-            <span class="w3-xlarge">Remained Chinese Food</span>
-            <span style="float: right; margin-left: 4px;"><button>Delete</button></span>
-            <span style="float: right;"><button>Edit</button></span>
+            <input id="ipTitle" type="text" class="w3-container w3-black w3-xlarge" style="border: none; border-bottom: 1px solid white; outline: none;"  />
+            <span style="float: right; margin-left: 4px;"><button onclick="done()">Done</button></span>
         </div>
         <div class="w3-container w3-xlarge w3-padding w3-grey">
-            <span>Got Date</span> : <span>2018-07-08</span>
+            <span>Got Date</span> : <input id="ipGotDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
             <br>
-            <span>Expired Date</span> : <span>2018-07-08 (D-3)</span>
+            <span>Expired Date</span> : <input id="ipExpDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
             <br>
-            <span>Description</span> : <span>bulahbulahbulahbulah</span>
+            <span>Description</span> : <input id="ipDesc"type="text" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
         </div>
     </div>
+    
+    <template id="tmpSelect">
     <div class="w3-white w3-margin">
         <div class="w3-container w3-padding w3-black">
-            <span class="w3-xlarge">Remained Chinese Food</span>
-            <span style="float: right; margin-left: 4px;"><button>Delete</button></span>
-            <span style="float: right;"><button>Edit</button></span>
+            <span id="spanTitle" class="w3-xlarge"></span>
+            <span style="float: right; margin-left: 4px;"><button onclick="remove(this)">Remove</button></span>
+            <span style="float: right;"><button onclick="edit(this)">Edit</button></span>
         </div>
         <div class="w3-container w3-xlarge w3-padding w3-grey">
-            <span>Got Date</span> : <span>2018-07-08</span>
+            <span>Got Date</span> : <span id="spanGotDate"></span>
             <br>
-            <span>Expired Date</span> : <span>2018-07-08 (D-3)</span>
+            <span>Expired Date</span> : <span id="spanExpDate"></span>
             <br>
-            <span>Description</span> : <span>bulahbulahbulahbulah</span>
+            <span>Description</span> : <span id="spanDesc"></span>
         </div>
     </div>
+    </template>
     <!-- End page content -->
 
 </body>
