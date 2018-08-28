@@ -21,18 +21,34 @@
 </style>
 <script>
     function add(){
-        var divInsertForm = document.querySelector('#divInsertForm');
-        divInsertForm.style.display = '';
+        var tmp = document.querySelector("#tmpUpdate");
+        var clone = document.importNode(tmp.content, true);
+        document.body.insertBefore(clone,document.querySelector("#divTopArea").nextSibling);
     }
     function edit(obj){
-        obj.innerHTML = "test";
-    }
-    function remove(obj){
-        obj.parentNode.removeChild(this);
+        var divSelectForm = obj.parentNode.parentNode.parentNode;
+        var title = divSelectForm.querySelector('#spanTitle');
+        var gotDate = divSelectForm.querySelector('#spanGotDate');
+        var expDate = divSelectForm.querySelector('#spanExpDate');
+        var desc = divSelectForm.querySelector('#spanDesc');
+        
+        var tmp = document.querySelector("#tmpUpdate");
+        tmp.content.querySelector('#ipTitle').value = title.textContent;
+        tmp.content.querySelector('#ipGotDate').value = gotDate.textContent;
+        tmp.content.querySelector('#ipExpDate').value = expDate.textContent;
+        tmp.content.querySelector('#ipDesc').value = desc.textContent;
+        
+        var clone = document.importNode(tmp.content, true);
+        divSelectForm.parentNode.insertBefore(clone,divSelectForm.nextSibling);
+        remove(obj);
         //send to server the information
     }
-    function done(){
-        var divInsertForm = document.querySelector('#divInsertForm');
+    function remove(obj){
+        document.body.removeChild(obj.parentNode.parentNode.parentNode);
+        //send to server the information
+    }
+    function done(obj){
+        var divInsertForm = obj.parentNode.parentNode.parentNode;
         var title = divInsertForm.querySelector('#ipTitle');
         var gotDate = divInsertForm.querySelector('#ipGotDate');
         var expDate = divInsertForm.querySelector('#ipExpDate');
@@ -65,20 +81,6 @@
         <button>Expired Date</button>
     </div>
     
-    <div id="divInsertForm" style="display: none" class="w3-white w3-margin">
-        <div class="w3-container w3-padding w3-black">
-            <input id="ipTitle" type="text" class="w3-container w3-black w3-xlarge" style="border: none; border-bottom: 1px solid white; outline: none;"  />
-            <span style="float: right; margin-left: 4px;"><button onclick="done()">Done</button></span>
-        </div>
-        <div class="w3-container w3-xlarge w3-padding w3-grey">
-            <span>Got Date</span> : <input id="ipGotDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
-            <br>
-            <span>Expired Date</span> : <input id="ipExpDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
-            <br>
-            <span>Description</span> : <input id="ipDesc"type="text" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
-        </div>
-    </div>
-    
     <template id="tmpSelect">
     <div class="w3-white w3-margin">
         <div class="w3-container w3-padding w3-black">
@@ -92,6 +94,22 @@
             <span>Expired Date</span> : <span id="spanExpDate"></span>
             <br>
             <span>Description</span> : <span id="spanDesc"></span>
+        </div>
+    </div>
+    </template>
+    
+    <template id="tmpUpdate">
+    <div class="w3-white w3-margin">
+        <div class="w3-container w3-padding w3-black">
+            <input id="ipTitle" type="text" class="w3-container w3-black w3-xlarge" style="border: none; border-bottom: 1px solid white; outline: none;"  />
+            <span style="float: right; margin-left: 4px;"><button onclick="done(this)">Done</button></span>
+        </div>
+        <div class="w3-container w3-xlarge w3-padding w3-grey">
+            <span>Got Date</span> : <input id="ipGotDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
+            <br>
+            <span>Expired Date</span> : <input id="ipExpDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
+            <br>
+            <span>Description</span> : <input id="ipDesc"type="text" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
         </div>
     </div>
     </template>
