@@ -22,6 +22,10 @@
 <script>
     function add(){
         var tmp = document.querySelector("#tmpUpdate");
+        tmp.content.querySelector('#ipTitle').value = "";
+        tmp.content.querySelector('#ipGotDate').value = "";
+        tmp.content.querySelector('#ipExpDate').value = "";
+        tmp.content.querySelector('#ipDesc').value = "";
         var clone = document.importNode(tmp.content, true);
         document.body.insertBefore(clone,document.querySelector("#divTopArea").nextSibling);
     }
@@ -63,12 +67,11 @@
         var clone = document.importNode(tmp.content, true);
         divInsertForm.parentNode.insertBefore(clone,divInsertForm.nextSibling);
         
-        divInsertForm.style.display = 'none';
         title.value = "";
         gotDate.value = "";
         expDate.value = "";
         desc.value = "";
-        
+        document.body.removeChild(divInsertForm);
         //send to server the information
     }
 </script>
