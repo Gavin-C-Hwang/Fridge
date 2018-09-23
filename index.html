@@ -19,7 +19,12 @@
         letter-spacing: 5px;
     }
 </style>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script>
+    window.onload = function() {
+        retrieveToServer();
+    };
+    
     function add(){
         var tmp = document.querySelector("#tmpUpdate");
         tmp.content.querySelector('#ipTitle').value = "";
@@ -31,6 +36,7 @@
     }
     function edit(obj){
         var divSelectForm = obj.parentNode.parentNode.parentNode;
+        var pk = divSelectForm.querySelector('#pk');
         var title = divSelectForm.querySelector('#spanTitle');
         var gotDate = divSelectForm.querySelector('#spanGotDate');
         var expDate = divSelectForm.querySelector('#spanExpDate');
@@ -41,82 +47,239 @@
         tmp.content.querySelector('#ipGotDate').value = gotDate.textContent;
         tmp.content.querySelector('#ipExpDate').value = expDate.textContent;
         tmp.content.querySelector('#ipDesc').value = desc.textContent;
+        tmp.content.querySelector('#pk').value = pk.value;
         
         var clone = document.importNode(tmp.content, true);
         divSelectForm.parentNode.insertBefore(clone,divSelectForm.nextSibling);
-        remove(obj);
+        document.body.removeChild(obj);
         //send to server the information
     }
     function remove(obj){
-        document.body.removeChild(obj.parentNode.parentNode.parentNode);
+        var selectedCard = obj.parentNode.parentNode.parentNode;
+        var pk = selectedCard.querySelector('#pk').value;
+        document.body.removeChild(selectedCard);
         //send to server the information
+        deleteToServer(pk);
     }
     function done(obj){
         var divInsertForm = obj.parentNode.parentNode.parentNode;
+        var pk = divInsertForm.querySelector('#pk');
         var title = divInsertForm.querySelector('#ipTitle');
         var gotDate = divInsertForm.querySelector('#ipGotDate');
         var expDate = divInsertForm.querySelector('#ipExpDate');
         var desc = divInsertForm.querySelector('#ipDesc');
-        
+        var colors = getColorByExpiredDate(expDate);
         var tmp = document.querySelector("#tmpSelect");
+        tmp.content.querySelector('#pk').value = pk.value;
         tmp.content.querySelector('#spanTitle').textContent = title.value;
         tmp.content.querySelector('#spanGotDate').textContent = gotDate.value;
         tmp.content.querySelector('#spanExpDate').textContent = expDate.value;
         tmp.content.querySelector('#spanDesc').textContent = desc.value;
-        
+        tmp.content.querySelector('#cardTitle').style.backgroundColor = colors.title;
+        tmp.content.querySelector('#cardContents').style.backgroundColor = colors.contents;
         var clone = document.importNode(tmp.content, true);
         divInsertForm.parentNode.insertBefore(clone,divInsertForm.nextSibling);
+        //send to server the information
+        pk.value === ''?
+        addToServer(title.value,gotDate.value,expDate.value , desc.value)
+        :updateToServer(pk.value,title.value,gotDate.value,expDate.value , desc.value)
         
         title.value = "";
         gotDate.value = "";
         expDate.value = "";
         desc.value = "";
         document.body.removeChild(divInsertForm);
-        //send to server the information
+    }
+    
+    function addToServer(title,gotDate,expiredDate,desc) {
+        jQuery.ajax({
+                type: "POST",
+                url: "https://www.tistory.com/apis/comment/write",
+                data: {
+                        access_token: "dd72c9fe7a101b8c80a47aae88c51611_02df53d1f69b60e8343dd55bf08b8a00",
+                        blogName: "invit",
+                        postId: "4",
+                        content: title+'@xhdtlswk@'+gotDate+'@xhdtlswk@'+expiredDate+'@xhdtlswk@'+desc,
+                        output: 'json'
+                    },
+                success: function(data) {
+                    debugger;
+                },
+                error: function(request,status,error) {
+                    var content = jQuery.parseJSON(request.responseText.substr(0,request.responseText.length/2));
+                    var firstCard = document.querySelector('#divTopArea').nextElementSibling;
+                    firstCard.querySelector('#pk').value = content.tistory.commentUrl.replace('\/4#comment','');
+                    debugger;
+                }
+        })
+    }
+    
+    function updateToServer(pk,title,gotDate,expiredDate,desc) {
+        jQuery.ajax({
+                method: "POST",
+                url: "https://www.tistory.com/apis/comment/modify",
+                data: {
+                        access_token: "dd72c9fe7a101b8c80a47aae88c51611_02df53d1f69b60e8343dd55bf08b8a00",
+                        blogName: "invit",
+                        postId: "4",
+                        commentId: pk,
+                        content: title+'@xhdtlswk@'+gotDate+'@xhdtlswk@'+expiredDate+'@xhdtlswk@'+desc,
+                        output: 'json'
+                    },
+                success: function(data) {
+                    debugger;
+                },
+                error: function(request,status,error) {
+                    debugger;
+                }
+        });
+                
+    }
+    
+    function deleteToServer(pk) {
+        jQuery.ajax({
+                method: "POST",
+                url: "https://www.tistory.com/apis/comment/delete",
+                data: {
+                        access_token: "dd72c9fe7a101b8c80a47aae88c51611_02df53d1f69b60e8343dd55bf08b8a00",
+                        blogName: "invit",
+                        postId: "4",
+                        commentId: pk,
+                        output: 'json'
+                    },
+                success: function(data) {
+                    debugger;
+                },
+                error: function(request,status,error) {
+                    debugger;
+                }
+        });
+    }
+    
+    function retrieveToServer() {
+        jQuery.ajax({
+                method: "GET",
+                url: "https://www.tistory.com/apis/comment/list",
+                data: {
+                        access_token: "dd72c9fe7a101b8c80a47aae88c51611_02df53d1f69b60e8343dd55bf08b8a00",
+                        blogName: "invit",
+                        postId: "4",
+                        output: 'json'
+                    },
+                success: function(data) {
+                    var tmp = document.querySelector("#tmpSelect");
+                    var arItems = data.tistory.item.comments;
+                    var divTopArea = document.querySelector('#divTopArea')
+                    for(var i in arItems){
+                        var comment = arItems[i].comment.split('@xhdtlswk@');
+                        var colors = getColorByExpiredDate(comment[2]);
+                        tmp.content.querySelector('#pk').value = arItems[i].id;
+                        tmp.content.querySelector('#spanTitle').textContent = comment[0];
+                        tmp.content.querySelector('#spanGotDate').textContent = comment[1];
+                        tmp.content.querySelector('#spanExpDate').textContent = comment[2];
+                        tmp.content.querySelector('#spanDesc').textContent = comment[3];
+                        tmp.content.querySelector('#cardTitle').style.backgroundColor = colors.title;
+                        tmp.content.querySelector('#cardContents').style.backgroundColor = colors.contents;
+            
+                        var clone = document.importNode(tmp.content, true);
+                        divTopArea.parentNode.insertBefore(clone,divTopArea.nextSibling);
+                    }
+                    
+                    debugger;
+                },
+                error: function(request,status,error) {
+                    debugger;
+                }
+        });
+    }
+    
+    function getColorByExpiredDate(expiredDate){
+        var result = {title:'',contents:''};
+        var today = new Date();
+        var expDate = new Date(expiredDate);
+        var timeDiff = Math.abs(expDate.getTime() - today.getTime());
+        var dateDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+        if( dateDiff < 0 ){
+            result.title = "#000000";
+            result.contents = "#9e9e9e";
+        }else if( dateDiff < 2 ){
+            result.title = "#547980";
+            result.contents = "#FF6670";
+        }else if( dateDiff < 5 ){
+            result.title = "#363636";
+            result.contents = "#FFD000";
+        }else if( dateDiff < 10 ){
+            result.title = "#A7226E";
+            result.contents = "#77A88D";
+        }else if( dateDiff < 20 ){
+            result.title = "#594F4F";
+            result.contents = "#89A7C2";
+        }else{
+            result.title = "#552659";
+            result.contents = "#F46DFF";
+        }
+        debugger;
+        return result;
     }
 </script>
+
 <body>
     <div id="divTopArea" class="w3-white w3-margin">
-        <input type="text"/>
-        <button id="btnAdd" onclick="add()">Add</button>
-        <button>Name</button>
-        <button>Got Date</button>
-        <button>Expired Date</button>
+        <input type="text" /><br />
+        <button id="btnAdd" class="w3-button w3-black w3-small" onclick="add()">Add</button>
+        <button class="w3-button w3-black w3-small">Name</button>
+        <button class="w3-button w3-black w3-small">Got Date</button>
+        <button class="w3-button w3-black w3-small">Expired Date</button>
     </div>
-    
     <template id="tmpSelect">
-    <div class="w3-white w3-margin">
-        <div class="w3-container w3-padding w3-black">
-            <span id="spanTitle" class="w3-xlarge"></span>
-            <span style="float: right; margin-left: 4px;"><button onclick="remove(this)">Remove</button></span>
-            <span style="float: right;"><button onclick="edit(this)">Edit</button></span>
+        <div class="w3-white w3-margin">
+            <div class="w3-container w3-padding" id="cardTitle" style="color: #fff">
+                <input id="pk" type="hidden" />
+                <span id="spanTitle" class="w3-large"></span>
+                <span style="float: right; margin-left: 4px;"><button onclick="remove(this)" class="w3-button w3-light-grey w3-small">Remove</button></span>
+                <span style="float: right;"><button onclick="edit(this)" class="w3-button w3-light-grey w3-small">Edit</button></span>
+            </div>
+            <div class="w3-container w3-large w3-padding" id="cardContents">
+                <span>Got Date</span> : <span id="spanGotDate"></span>
+                <br>
+                <span>Expired Date</span> : <span id="spanExpDate"></span>
+                <br>
+                <span>Description</span> : <span id="spanDesc"></span>
+            </div>
         </div>
-        <div class="w3-container w3-xlarge w3-padding w3-grey">
-            <span>Got Date</span> : <span id="spanGotDate"></span>
-            <br>
-            <span>Expired Date</span> : <span id="spanExpDate"></span>
-            <br>
-            <span>Description</span> : <span id="spanDesc"></span>
-        </div>
-    </div>
     </template>
-    
+
     <template id="tmpUpdate">
-    <div class="w3-white w3-margin">
-        <div class="w3-container w3-padding w3-black">
-            <input id="ipTitle" type="text" class="w3-container w3-black w3-xlarge" style="border: none; border-bottom: 1px solid white; outline: none;"  />
-            <span style="float: right; margin-left: 4px;"><button onclick="done(this)">Done</button></span>
+        <div class="w3-white w3-margin">
+            <div class="w3-container w3-padding w3-black">
+                <input id="pk" type="hidden" />
+                <input id="ipTitle" type="text" class="w3-container w3-black w3-large" style="border: none; border-bottom: 1px solid white; outline: none; width: 200px;" />
+                <span style="float: right; margin-left: 4px;"><button onclick="done(this)" class="w3-button w3-light-grey w3-small">Done</button></span>
+            </div>
+            <div class="w3-container w3-large w3-padding w3-grey">
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 140px;"><span>Got Date :</span></td>
+                        <td><input id="ipGotDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;width: 100%;" /></td>
+                    </tr>
+                </table>
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 140px;"><span>Expired Date :</span></td>
+                        <td><input id="ipExpDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none; width: 100%;" /></td>
+                    </tr>
+                </table>
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 140px;"><span>Description :</span></td>
+                        <td><input id="ipDesc" type="text" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none; width: 100%;" /></td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <div class="w3-container w3-xlarge w3-padding w3-grey">
-            <span>Got Date</span> : <input id="ipGotDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
-            <br>
-            <span>Expired Date</span> : <input id="ipExpDate" type="date" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
-            <br>
-            <span>Description</span> : <input id="ipDesc"type="text" class="w3-gray" style="border: none; border-bottom: 1px solid black; outline: none;"/>
-        </div>
-    </div>
     </template>
     <!-- End page content -->
 
 </body>
+
 </html>
