@@ -197,7 +197,7 @@
         var result = {title:'',contents:''};
         var today = new Date();
         var expDate = new Date(expiredDate);
-        var timeDiff = Math.abs(expDate.getTime() - today.getTime());
+        var timeDiff = expDate.getTime() - today.getTime();
         var dateDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
         if( dateDiff < 0 ){
             result.title = "#000000";
