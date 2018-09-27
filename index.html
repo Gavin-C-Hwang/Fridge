@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 <style>
     body {
         font-family: "Times New Roman", Georgia, Serif;
@@ -33,7 +34,31 @@
         tmp.content.querySelector('#ipDesc').value = "";
         var clone = document.importNode(tmp.content, true);
         document.body.insertBefore(clone,document.querySelector("#divTopArea").nextSibling);
+        
+        if(!('webkitSpeechRecognition' in window)) jQuery('.fa-microphone').css('display','none');
+        else {
+            var mic = new webkitSpeechRecognition();
+            mic.continuous = true;
+            mic.interimResults = true;
+            mic.lang = 'ko-KR';
+        }
+        mic.onresult = function(e) {
+            var b = '', c = false;
+            for(var i = e.resultIndex; i < e.results.length; ++i) {
+                b += e.results[i][0].transcript;
+                c = e.results[i].isFinal;
+            }
+            jQuery('#ipTitle').val(b);
+            if(c) mic.stop();
+        };
+        mic.onend = function() {
+            jQuery('.fa-microphone').css('color','#fff');
+        };
+        
+        mic.start();
+        jQuery('.fa-microphone').css('color','#f00');
     }
+    
     function edit(obj){
         var divSelectForm = obj.parentNode.parentNode.parentNode;
         var pk = divSelectForm.querySelector('#pk');
@@ -240,11 +265,7 @@
 
 <body>
     <div id="divTopArea" class="w3-white w3-margin">
-        <input type="text" /><br />
-        <button id="btnAdd" class="w3-button w3-black w3-small" onclick="add()">Add</button>
-        <button class="w3-button w3-black w3-small">Name</button>
-        <button class="w3-button w3-black w3-small">Got Date</button>
-        <button class="w3-button w3-black w3-small">Expired Date</button>
+        <button id="btnAdd" class="w3-button w3-black w3-small" onclick="add()" style="width: 100%">Add</button>
     </div>
     <template id="tmpSelect">
         <div class="w3-white w3-margin">
@@ -268,8 +289,11 @@
         <div class="w3-white w3-margin">
             <div class="w3-container w3-padding w3-black">
                 <input id="pk" type="hidden" />
-                <input id="ipTitle" type="text" class="w3-container w3-black w3-large" style="border: none; border-bottom: 1px solid white; outline: none; width: 200px;" />
-                <span style="float: right; margin-left: 4px;"><button onclick="done(this)" class="w3-button w3-light-grey w3-small">Done</button></span>
+                <input id="ipTitle" type="text" class="w3-container w3-black w3-large" style="border: none; border-bottom: 1px solid white; outline: none; width: 170px;" />
+                <span style="float: right; margin-left: 4px;">
+                    <i class="fas fa-microphone " style="font-size: 20pt;vertical-align: middle; margin-right: 10px;"></i>
+                    <button onclick="done(this)" class="w3-button w3-light-grey w3-small">Done</button>
+                </span>
             </div>
             <div class="w3-container w3-large w3-padding w3-grey">
                 <table style="width: 100%">
