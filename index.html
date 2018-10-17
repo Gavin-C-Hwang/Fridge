@@ -29,7 +29,7 @@
     function add(){
         var tmp = document.querySelector("#tmpUpdate");
         tmp.content.querySelector('#ipTitle').value = "";
-        tmp.content.querySelector('#ipGotDate').value = "";
+        tmp.content.querySelector('#ipGotDate').valueAsDate = new Date();
         tmp.content.querySelector('#ipExpDate').value = "";
         tmp.content.querySelector('#ipDesc').value = "";
         var clone = document.importNode(tmp.content, true);
@@ -93,7 +93,7 @@
         var gotDate = divInsertForm.querySelector('#ipGotDate');
         var expDate = divInsertForm.querySelector('#ipExpDate');
         var desc = divInsertForm.querySelector('#ipDesc');
-        var colors = getColorByExpiredDate(expDate);
+        var colors = getColorByExpiredDate(expDate.value);
         var tmp = document.querySelector("#tmpSelect");
         tmp.content.querySelector('#pk').value = pk.value;
         tmp.content.querySelector('#spanTitle').textContent = title.value;
