@@ -76,7 +76,7 @@
         
         var clone = document.importNode(tmp.content, true);
         divSelectForm.parentNode.insertBefore(clone,divSelectForm.nextSibling);
-        document.body.removeChild(obj);
+        document.body.removeChild(divSelectForm);
         //send to server the information
     }
     function remove(obj){
